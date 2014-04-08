@@ -6,10 +6,10 @@
     <%= form_tag sessions_path do %>
 
       <%= label_tag :email, 'Email' %>
-      <%= text_field_tag :email, params[:email] %>
+      <%= text_field_tag :email, nil, name: 'session[email]' %>
 
       <%= label_tag :password, 'Password' %>
-      <%= password_field_tag :password, params[:password] %>
+      <%= password_field_tag :password, nil, name: 'session[password]' %>
 
       <%= submit_tag "Sign in", class: "btn btn-large btn-primary" %>
     <% end %>
