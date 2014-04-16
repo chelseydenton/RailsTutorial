@@ -119,7 +119,7 @@ describe "email address with mixed case" do
     end
   end
 
-describe "remember token" do
+  describe "remember token" do
     before { @user.save }
     its(:remember_token) { should_not be_blank }
   end
@@ -145,6 +145,16 @@ describe "remember token" do
       microposts.each do |micropost|
         expect(Micropost.where(id: micropost.id)).to be_empty
       end
+    end
+
+    describe "status" do
+      let(:unfollowed_post) do
+        FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+      end
+
+      its(:feed) { should include(newer_micropost) }
+      its(:feed) { should include(older_micropost) }
+      its(:feed) { should_not include(unfollowed_post) }
     end
   end
 
