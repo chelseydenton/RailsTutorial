@@ -26,12 +26,38 @@ describe "Static pages" do
         visit root_path
       end
 
+      it { should have_content('2 microposts') }
+
       it "should render the user's feed" do
         user.feed.each do |item|
           expect(page).to have_selector("li##{item.id}", text: item.content)
         end
       end
     end
+  end
+
+  describe "for signed-in users with one post" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
+        sign_in user
+        visit root_path
+      end
+
+      it { should have_content('1 micropost') }
+  end
+
+  describe "for signed-in user with 50 posts" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do
+        50.times { FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum") }
+        sign_in user
+        visit root_path
+      end
+
+      it { should have_content('50 microposts')}
+
+      it { should have_selector('div.pagination') }
   end
 
   describe "Help page" do
