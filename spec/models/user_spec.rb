@@ -134,6 +134,36 @@ describe "email address with mixed case" do
     its(:remember_token) { should_not be_blank }
   end
 
+  describe "Relationships after user destroy" do
+ 
+    let(:followed_user) { FactoryGirl.create(:user) }
+    let(:following_user) { FactoryGirl.create(:user)}
+
+    before do
+      @user.save
+      @user.follow!(followed_user)
+      following_user.follow!(@user)
+      3.times { following_user.microposts.create!(content: "Lorem ipsum")}
+      3.times { followed_user.microposts.create!(content: "Lorem ipsum") }
+    end
+
+    it "should destroy associated relationships" do
+
+      relationships = @user.relationships.to_a
+      reverse_relationships = @user.reverse_relationships.to_a
+      @user.destroy
+      expect(relationships).not_to be_empty
+      expect(reverse_relationships).not_to be_empty
+
+      relationships.each do |relationship|
+        expect(Relationship.where(id: relationship.id)).to be_empty
+      end
+      reverse_relationships.each do |reverse_relationship|
+        expect(Relationship.where(id: reverse_relationship.id)).to be_empty
+      end
+    end
+  end
+
   describe "micropost associations" do
 
     before { @user.save }
@@ -144,11 +174,14 @@ describe "email address with mixed case" do
       FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
     end
 
+
     it "should have the right microposts in the right order" do
       expect(@user.microposts.to_a).to eq [newer_micropost, older_micropost]
     end
 
     it "should destroy associated microposts" do
+     
+
       microposts = @user.microposts.to_a
       @user.destroy
       expect(microposts).not_to be_empty

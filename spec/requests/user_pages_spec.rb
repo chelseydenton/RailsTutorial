@@ -263,5 +263,36 @@ describe "edit" do
     end
   end
 
+  describe "following/followers stats" do
+    let(:user) { FactoryGirl.create(:user) }
+    let(:other_user) { FactoryGirl.create(:user) }
+    before do
+      user.follow!(other_user)
+      other_user.follow!(user)
+      visit user_path(user)
+    end
+
+    it { should have_link("1 following", href: following_user_path(user)) }
+    it { should have_link("1 followers", href: followers_user_path(user)) }
+      
+
+    describe "after unfollowing other user" do
+      before do
+        user.unfollow!(other_user)
+        visit user_path(user)
+      end
+      it { should have_link("0 following", href: following_user_path(user)) }
+      it { should have_link("1 followers", href: followers_user_path(user)) }
+    end
+
+    describe "after being unfollowed" do
+      before do
+        other_user.unfollow!(user)
+        visit user_path(user)
+      end
+      it { should have_link("1 following", href: following_user_path(user)) }
+      it { should have_link("0 followers", href: followers_user_path(user)) }
+    end
+  end
   
 end
